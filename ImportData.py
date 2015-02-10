@@ -164,24 +164,30 @@ def ImportDataAndExtractHOGFeatures(hog, days, saveAnnotations, thisManySamples)
                 elif annotationAspectRatio < winSizeAspectRatio:
                     extendThisMuch = (winSizeAspectRatio * annWidth)/2
                     # If no room to extend height, resize and lose aspect ratio
-                    if ulr < np.floor(extendThisMuch) or lrr > height-np.ceil(extendThisMuch):
+                    if ulr < np.floor(extendThisMuch) or \
+                       lrr > height-np.ceil(extendThisMuch):
                         annotation = img[ulr:lrr, ulc:lrc]
                         annotation = cv2.resize(annotation, hog.winSize)
                     # If there is room to extend, then extend height
                     else:
-                        annotation = img[ulr-np.int(np.floor(extendThisMuch)):lrr+np.int(np.ceil(extendThisMuch)), ulc:lrc]
+                        annotation = img[ulr-np.int(np.floor(extendThisMuch)):\
+                                         lrr+np.int(np.ceil(extendThisMuch)),
+                                         ulc:lrc]
                         annotation = cv2.resize(annotation, hog.winSize)
                 # If more height than width --> select width accordingly
                 # Aspect ratio is preserved
                 elif annHeight > annWidth:
                     extendThisMuch = (winSizeAspectRatio * annHeight)/2
                     # If no room to extend width, resize and lose aspect ratio
-                    if ulc < np.floor(extendThisMuch) or lrc > width-np.ceil(extendThisMuch):
+                    if ulc < np.floor(extendThisMuch) or \
+                       lrc > width-np.ceil(extendThisMuch):
                         annotation = img[ulr:lrr, ulc:lrc]
                         annotation = cv2.resize(annotation, hog.winSize)
                     # If there is room to extend, then extend width
                     else:
-                        annotation = img[ulr:lrr, ulc-np.int(np.floor(extendThisMuch)):lrc+np.int(np.ceil(extendThisMuch))]
+                        annotation = img[ulr:lrr,
+                                         ulc-np.int(np.floor(extendThisMuch)):\
+                                         lrc+np.int(np.ceil(extendThisMuch))]
                         annotation = cv2.resize(annotation, hog.winSize)
                         
                 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -335,7 +341,7 @@ def ImportDataAndExtractHOGFeatures(hog, days, saveAnnotations, thisManySamples)
     trainData    = np.asarray(trainData)
     trainClasses = np.asarray(trainClasses)
     labels       = np.asarray(labels)
-
+    
     if type(thisManySamples) == int:
         # Take equal amount of positives and negatives
         np.random.seed(54321)

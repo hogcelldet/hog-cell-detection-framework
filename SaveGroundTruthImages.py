@@ -8,12 +8,6 @@ import ConfigParser
 from PIL import Image, ImageDraw
 
 # ----------------------------------------------------------------
-
-# Clears the screen
-def Cls():
-    os.system(['clear','cls'][os.name == 'nt'])
-
-# ----------------------------------------------------------------
  
 # Returns a list of paths to subfolders
 def Listdirs(folder):
@@ -24,11 +18,9 @@ def Listdirs(folder):
 
 # ----------------------------------------------------------------
 
-if __name__ == "__main__":
+def Save(pathToFolder):
     
-    Cls() # Clear screen
-    
-    listOfDayDirs = Listdirs(r".\testWithThese")
+    listOfDayDirs = Listdirs(pathToFolder)
     fileTypes = ["bmp", "jpg", "png"]
     
     # Loop through input folders (days)

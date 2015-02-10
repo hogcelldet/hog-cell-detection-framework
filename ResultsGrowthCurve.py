@@ -14,6 +14,7 @@ import ImportData
 import SVM
 import HardExamples
 import DetectionProcess
+import SaveGroundTruthImages
 import BivariateSimilarityIndex
 
 # ----------------------------------------------------------------
@@ -122,7 +123,6 @@ if __name__ == '__main__':
     
     searchMethod = "detectMultiScale"
     
-    #evaluate = ("singleImage", r".\testWithThese\day3\Tile002496.bmp")
     evaluate = ("folder",      r".\testWithThese")
     
     outputFolder = r".\\" + searchMethod + "_" + datetime.datetime. \
@@ -209,6 +209,7 @@ if __name__ == '__main__':
     ax2.grid(color='black', linestyle='-.', linewidth=1, alpha=0.2)
     
     colors = ["b","g","r","c","m","y","k"]
+    SaveGroundTruthImages.Save(evaluate[1])
     truthDir = r".\groundTruth"
     estimDir = outputFolder + "\\detectionBinaries"
     fileTypes = ["bmp", 'jpg', 'png']    

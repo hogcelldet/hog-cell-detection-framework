@@ -87,7 +87,6 @@ def Search(hog, trainData, trainClasses, labels,
             model = SVM.Train(trainData, trainClasses,
                               cost=cost, CVtype="lolo", labels=labels)
                 
-        
         # Use the model to detect cells from already seen images
         # and compare them to ground truth in order to find false positives
         w = model.coef_[0]
@@ -161,7 +160,9 @@ def Search(hog, trainData, trainClasses, labels,
                         # This example is false positive if it overlaps
                         # less than x % with any of the true positives
                         elif (qi == len(groundTruth[directory][imName]["positiveExamples"])-1):
-
+                            
+                            # You can set minimum weight/confidence threshold
+                            # for hard examples here.
                             if w[ri] > 0.0:
 
                                 cropped = imgOrig[ r[1]:r[1]+r[3], r[0]:r[0]+r[2] ]

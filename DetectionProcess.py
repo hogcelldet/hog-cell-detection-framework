@@ -156,8 +156,7 @@ def OneOrTwoParameterSearch(hog, model, searchMethod, defaultParams,
     res["w"]                  = [] # Confidence for detections
     res["allParams"]          = [] # All detection parameters
     
-    # If no parameter values to be searched,
-    # one only wants to use predefined values
+    # If no parameter values to be searched, use predefined values.
     if len(paramsAndTheirRangesToBeVaried) == 0:
         
         res,stopSearching = ConductSingleSearch(hog, model, res, [],
@@ -296,12 +295,13 @@ def ConductSingleSearch(hog, model, res, i,
     # Image name withouth path or file extension
     imName = imFileName[imFileName.rfind("\\")+1:imFileName.rfind(".")]
     
+    # Detection binary images are saved when Bivariate Similarity Index (BSI)
+    # is calculated.
     if saveDetectionBinaryImages:
         # Create new black image where detections are marked
         im = Image.new("L", [img.shape[1],img.shape[0]], "black") 
-        #im = np.zeros((img.shape))
         for x, y, w, h in found:
-            # Mark detections with white
+            # Mark rectangle detections with white
             draw = ImageDraw.Draw(im)
             draw.rectangle([x, y, x+w, y+h],  fill=255)
         # Determine the image day
@@ -396,8 +396,8 @@ def ConductSingleSearch(hog, model, res, i,
 
 """
 
-This function initializes parameters correctly for hog.detect or 
-hog.detectMultiScalefor function.
+This function initializes parameters correctly for hog.detect and
+hog.detectMultiScale function.
 
 """
 

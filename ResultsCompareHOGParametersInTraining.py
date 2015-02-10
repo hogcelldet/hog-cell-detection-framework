@@ -34,7 +34,7 @@ def add_subplot_axes(ax,rect,axisbg='w'):
 
 if __name__ == '__main__':
     
-    parameterToBeVaried = "nbins"    
+    parameterToBeVaried = "cellSize"    
     
     # Initialize dictionary of lists where resutls will be saved
     ROCResults = {}

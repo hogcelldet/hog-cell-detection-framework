@@ -220,6 +220,6 @@ def VisualizeClassSeparability(model, trainData, trainClasses):
     pl.tight_layout()
     pl.show()
 	
-    #plt.savefig('classDistribution.png')
+    #pl.savefig('classDistribution.png')
 
     

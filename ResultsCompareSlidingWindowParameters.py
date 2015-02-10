@@ -107,8 +107,8 @@ if __name__ == '__main__':
     #evaluate = ("folder",      r".\testWithThese")
     #evaluate = ("folder",      r".\trainWithThese")
     
-    #parametersToStudy = ["scale", "winStride"]
-    parametersToStudy = ["nlevels"]
+    parametersToStudy = ["scale", "winStride"]
+    #parametersToStudy = ["nlevels"]
     
     allParameterNamesAndRanges = dict(
     hitThreshold   = [0.1,0.0,-0.1],#np.arange(5.0,-5.0,-0.1),
