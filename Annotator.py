@@ -15,6 +15,8 @@ z key: Activate/deactivate zooming mode.
 Space: Move to the next image.
 Esc: Exit the program.
 
+Requires the images to be stored in a folder with subfolders (e.g., one per day).
+
 """
 
 import glob
@@ -157,9 +159,9 @@ def drawAnnotations(image):
         elif mode == "Annotate zoomed":
             
             # Check that section is inside zoomed area
-            if ulc >= zoomedCoords[0] and ulr >= zoomedCoords[1] and \
-            lrc <= zoomedCoords[2] and lrr <= zoomedCoords[3]:
-                
+            if ulc <= zoomedCoords[2] and ulr <= zoomedCoords[3] and \
+            lrc >= zoomedCoords[0] and lrr >= zoomedCoords[1]:
+
                 # Correct coordinates relative to zoomed area
                 lrc = (lrc-ulc) * zoomRate + (ulc-zoomedCoords[0]) * zoomRate
                 lrr = (lrr-ulr) * zoomRate + (ulr-zoomedCoords[1]) * zoomRate
