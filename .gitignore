@@ -1,0 +1,11 @@
+# Compiled Python scripts
+*.pyc
+
+# Swap files
+*.swp
+*.swo
+*.swn
+*.swm
+
+# PyCharm generatred
+.idea
