@@ -42,7 +42,6 @@ images
     \
      image5.jpg
 
-
 """
 
 
