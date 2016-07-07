@@ -2,7 +2,7 @@
 
 
 import numpy as np
-import pylab as pl
+from matplotlib import pylab as pl
 from sklearn import svm
 from sklearn.metrics import auc
 from sklearn.metrics import roc_curve
@@ -41,13 +41,14 @@ Linear SVM classifier
 """
 
 
-def train(train_data, train_classes, cost=None, cv_type=5, labels=None):
+def train(train_data, train_classes, cost=None, cv_type=5, labels=None,
+          scoring='roc_auc'):
 
     # If cost parameter is array or list, perform cross-validation
     # with the range provided in the container
     if (isinstance(cost, np.ndarray) or
             isinstance(cost, list) and len(cost) > 0):
-    
+
         print "------------------------------------------------------------"
         print "Searching for the best cost parameter with cross-validation"
         print "------------------------------------------------------------\n"
@@ -61,18 +62,24 @@ def train(train_data, train_classes, cost=None, cv_type=5, labels=None):
         grid = GridSearchCV(
             estimator=svm.SVC(
                 kernel='linear',
-                class_weight='auto',
+                class_weight='balanced',
                 probability=False,
                 random_state=123,
             ),
             param_grid={"C": cost}, cv=cv,
-            scoring='roc_auc',
+            scoring=scoring,
             n_jobs=-1, pre_dispatch='2*n_jobs',
             refit=True, verbose=1
         )
         grid.fit(train_data, train_classes)
-        print("      # ROC AUC of the best estimator on the validation data:" +
-              " %0.3f %%" % (grid.best_score_ * 100))
+        if scoring == 'roc_auc':
+            print(
+                "      # ROC AUC of the best estimator on the "
+                "validation data: %0.3f" % grid.best_score_)
+        elif scoring == 'accuracy':
+            print(
+                "      # Accuracy of the best estimator on the "
+                "validation data: %0.3f %%" % (grid.best_score_ * 100))
         print "      # " + \
               "Cost which gave the best results on the validation data:"
         for param, val in grid.best_params_.items():
@@ -90,7 +97,7 @@ def train(train_data, train_classes, cost=None, cv_type=5, labels=None):
         
         # Initialize classifier
         classifier = svm.SVC(C=cost, kernel='linear', probability=False,
-                             class_weight='auto', random_state=123)
+                             class_weight='balanced', random_state=123)
 
         # Train the classifier
         model = classifier.fit(train_data, train_classes)
@@ -111,7 +118,7 @@ def train(train_data, train_classes, cost=None, cv_type=5, labels=None):
         print "------------------------------------------------------------\n"
         # Initialize classifier
         classifier = svm.SVC(C=1.0, kernel='linear', probability=False,
-                             class_weight='auto', random_state=123)
+                             class_weight='balanced', random_state=123)
         
         # Train the classifier
         model = classifier.fit(train_data, train_classes)
@@ -145,7 +152,7 @@ def roc(model, train_data, train_classes, test_data, test_classes):
         
     # Initialize classifier with best C, all the data & probabilities=True
     classifier = svm.SVC(C=model.C, kernel='linear', probability=True,
-                         class_weight='auto', random_state=123)
+                         class_weight='balanced', random_state=123)
     
     # Train the classifier
     classifier.fit(train_data, train_classes)

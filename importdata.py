@@ -1,5 +1,18 @@
 # -*- coding: utf-8 -*-
 
+import os
+import time
+import glob
+import uuid
+import ConfigParser
+
+import cv2
+import numpy as np
+from scipy import misc
+
+import utils
+
+
 """
 Imports training data and generates features
 
@@ -14,19 +27,6 @@ n_samples = Optional integer.
                          this many negative examples will be imported.
             Else: All examples will be imported.
 """
-
-
-import os
-import time
-import glob
-import uuid
-import ConfigParser
-
-import cv2
-import scipy.io
-import numpy as np
-
-import utils
 
 
 def import_images_extract_hog_features(hog, days, save_annotations,
@@ -178,12 +178,15 @@ def import_images_extract_hog_features(hog, days, save_annotations,
                         annotation = cv2.resize(annotation, hog.winSize)
 
                 # ----------------------------------------------------
-                # Generate feature
+                # Calculate HOG features
                 # ----------------------------------------------------
 
-                feature = hog.compute(annotation)[:, 0]
+                feature = hog.compute(annotation)
 
+                # ----------------------------------------------------
                 # Save the feature
+                # ----------------------------------------------------
+
                 if "positiveExample" in section:
 
                     # Save size & aspect ratio
@@ -289,7 +292,7 @@ def import_images_extract_hog_features(hog, days, save_annotations,
                             if not os.path.exists(folder):
                                 os.makedirs(folder)
                             # Save the image
-                            scipy.misc.imsave(
+                            misc.imsave(
                                 folder + "\\" +
                                 folder[folder.rfind("\\")+1:] + "_" +
                                 im_name + "_" + str(uuid.uuid4().fields[-1]) +
@@ -335,13 +338,20 @@ def import_images_extract_hog_features(hog, days, save_annotations,
         for examples in training_examples[folder]["negativeExamples"]:
             train_data = train_data + examples
             train_classes = train_classes + ([0] * len(examples))
-            labels = labels + ([label] * len(examples))
-
+            # Let's assign random labels to negative examples so that each
+            # day (label) will have also negative examples.
+            # Images from latest days (labels) consist of only
+            # positive examples and that is why no negative examples are not
+            # collected from those days.
+            labels = labels + np.random.randint(
+                low=0, high=len(training_examples.keys()),
+                size=len(examples)).tolist()
         label += 1
 
-    train_data = np.asarray(train_data)
-    train_classes = np.asarray(train_classes)
-    labels = np.asarray(labels)
+    # Squeeze removes unnecessary extra dimension
+    train_data = np.squeeze(np.array(train_data))
+    train_classes = np.array(train_classes)
+    labels = np.array(labels)
 
     np.random.seed(54321)
 

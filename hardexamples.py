@@ -7,22 +7,22 @@ import glob
 import uuid
 import datetime
 
-import scipy
 import cv2
+import scipy
 import numpy as np
 
 import svm
 import utils
+import detect
 import filters
-import DetectionProcess
-import MeasurePerformance
+import evaluation
 
 
 def search(hog, train_data, train_classes, labels,
            ground_truth, amount_to_initial_training=1.0,
            save_images_with_detections=False, save_hard_example_images=True,
            max_iters=1000, calculate_roc=False,
-           roc_for_this_many_first_iters=5):
+           roc_for_this_many_first_iters=5, assign_random_labels=True):
 
     # Initialize dictionary of lists where results will be saved
     roc_results = {"FPR": [], "TPR": [], "AUC": [], "iter": [],
@@ -91,10 +91,9 @@ def search(hog, train_data, train_classes, labels,
             padding=(0, 0),
             # IMPORTANT! if bigger than (0,0),
             # detections can have negative values which cropping does not like
-            scale=1.05,
+            scale=1.0,
             finalThreshold=2,
-            useMeanshiftGrouping=False
-        )
+            useMeanshiftGrouping=False)
 
         # Input folder location and possible image types
         day_dirs = utils.list_dirs(r".\trainWithThese")
@@ -134,7 +133,7 @@ def search(hog, train_data, train_classes, labels,
                 im_orig = cv2.imread(im_file_name, cv2.CV_LOAD_IMAGE_GRAYSCALE)
 
                 # Detect
-                found, time_taken, w = DetectionProcess.sliding_window(
+                found, time_taken, w = detect.sliding_window(
                     hog, im, sliding_window_method, params,
                     filter_detections=False)
 
@@ -160,7 +159,7 @@ def search(hog, train_data, train_classes, labels,
 
                             # You can set minimum weight/confidence threshold
                             # for hard examples here.
-                            if w[ri] <= 0.0:
+                            if w[ri] <= -9999999.0:
                                 continue
 
                             cropped = im_orig[r[1]:r[1] + r[3],
@@ -196,16 +195,16 @@ def search(hog, train_data, train_classes, labels,
                 path_to_detections_ini = (child_folder + "\\" + im_name +
                                           "_iter" + str(i) + ".ini")
 
-                DetectionProcess.save_ini(found, path_to_detections_ini,
-                                          sliding_window_method, im_file_name,
-                                          hog)
+                detect.save_ini(found, path_to_detections_ini,
+                                sliding_window_method, im_file_name,
+                                hog)
 
                 # Analyze the results, build confusion matrix
                 path_to_truth_ini = (im_file_name[:im_file_name.rfind(".")] +
                                      "_annotations.ini")
 
                 tp, fp, fn, tpr, fpr, f1, f05, f09, n_cells_truth, \
-                    im_with_detections = MeasurePerformance.Measure(
+                    im_with_detections = evaluation.assess_detections(
                         path_to_detections_ini, path_to_truth_ini,
                         im_file_name)
 
@@ -221,11 +220,28 @@ def search(hog, train_data, train_classes, labels,
 
         # If no hard examples were found, draw ROC for the last time and exit
         if len(iter_hard_examples) == 0:
-            roc_results, cost = roc(train_data, train_classes, labels,
-                                    roc_results)
-            roc_results["iter"].append(i)
-            roc_results["nrOfIterHE"].append(0)
+            print "\n|----------------------------------------------------"
+            print "| No hard examples found!"
+
+            if calculate_roc:
+                print "| Evaluate with validation data once more and exit..."
+                roc_results, cost = roc(train_data, train_classes, labels,
+                                        roc_results)
+                roc_results["iter"].append(i)
+                roc_results["nrOfIterHE"].append(0)
+            else:
+                print "| Exiting the search..."
+            print "|----------------------------------------------------\n"
             break
+
+        if assign_random_labels:
+            # Overwrite true labels. One would do this if hard examples are not
+            # collected from all labels, which is the case here because of
+            # latest days contain only positive examples (no room to collect
+            # hard examples).
+            iter_hard_example_labels = np.random.randint(
+                low=0, high=len(day_dirs),
+                size=len(iter_hard_examples)).tolist()
 
         # Concatenate
         total_hard_examples = total_hard_examples + iter_hard_examples
@@ -233,8 +249,8 @@ def search(hog, train_data, train_classes, labels,
                                      iter_hard_example_labels)
 
         # List to array
-        iter_hard_example_labels = np.asarray(iter_hard_example_labels)
-        iter_hard_examples = np.asarray(iter_hard_examples)
+        iter_hard_example_labels = np.array(iter_hard_example_labels)
+        iter_hard_examples = np.array(iter_hard_examples)
 
         # Append
         train_data = np.concatenate((train_data, iter_hard_examples))
@@ -297,20 +313,20 @@ def roc(train_data, train_classes, labels, roc_results):
 
     # Partition the data
     testing_data = np.concatenate((
-        train_data[pos_ex_row_indices[-for_testing_pos:]],
-        train_data[neg_ex_row_indices[-for_testing_neg:]]))
+        train_data[pos_ex_row_indices[for_testing_pos:]],
+        train_data[neg_ex_row_indices[for_testing_neg:]]))
     training_data = np.concatenate((
-        train_data[pos_ex_row_indices[0:for_training_pos]],
-        train_data[neg_ex_row_indices[0:for_training_neg]]))
+        train_data[pos_ex_row_indices[:for_training_pos]],
+        train_data[neg_ex_row_indices[:for_training_neg]]))
     training_labels = np.concatenate((
-        labels[pos_ex_row_indices[0:for_training_pos]],
-        labels[neg_ex_row_indices[0:for_training_neg]]))
+        labels[pos_ex_row_indices[:for_training_pos]],
+        labels[neg_ex_row_indices[:for_training_neg]]))
     testing_classes = np.concatenate((
-        train_classes[pos_ex_row_indices[-for_testing_pos:]],
-        train_classes[neg_ex_row_indices[-for_testing_neg:]]))
+        train_classes[pos_ex_row_indices[for_testing_pos:]],
+        train_classes[neg_ex_row_indices[for_testing_neg:]]))
     training_classes = np.concatenate((
-        train_classes[pos_ex_row_indices[0:for_training_pos]],
-        train_classes[neg_ex_row_indices[0:for_training_neg]]))
+        train_classes[pos_ex_row_indices[:for_training_pos]],
+        train_classes[neg_ex_row_indices[:for_training_neg]]))
 
     # Determine best C
     cost = 10.0 ** (np.arange(-2, 3, 1))
