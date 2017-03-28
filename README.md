@@ -1,6 +1,4 @@
-===============================
-hog-cell-detection-framework
-===============================
+# hog-cell-detection-framework
 
 Cell detection framework based on HOG feature descriptors and iterative training. The framework is programmed in Python by using OpenCV's implementation of HOG descriptor and scikit-learn's implementation of SVM.
 
@@ -8,7 +6,7 @@ The framework was produced during a master’s thesis work that was carried out 
 
 A research article _"Training based cell detection from bright-field microscope images"_ summing up the essence of the thesis was accepted to the Image and Signal Processing and Analysis (ISPA) 2015 conference: http://dx.doi.org/10.1109/ISPA.2015.7306051.
 
-##Prerequisites
+## Prerequisites
 
 * Python 2.7.12
 * OpenCV 2.4.11
@@ -17,7 +15,7 @@ A research article _"Training based cell detection from bright-field microscope 
 * EasyGui 0.96
 * PIL 1.1.7
 
-##Data
+## Data
 
 Images and annotations for training and testing:
 
@@ -27,7 +25,7 @@ All sharpest images from each day:
 
 https://drive.google.com/folderview?id=0BwxRd8rtJl9UVnJkVExQTko4Mmc&usp=sharing
 
-##Citing
+## Citing
 
 You can freely use and edit the code, but please cite the source.
 
@@ -52,7 +50,7 @@ You can freely use and edit the code, but please cite the source.
           organization={IEEE}
         }
     
-##Contact
+## Contact
 
 For any questions related to the work, please contact:
 
